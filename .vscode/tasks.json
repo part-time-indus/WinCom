@@ -18,7 +18,7 @@
           "/Zi",
           "/EHsc",
           "/Fe:",
-          "${workspaceFolder}\\build\\debug\\${fileBasenameNoExtension}\\${fileBasenameNoExtension}.exe",
+          "${workspaceFolder}\\build\\debug\\${fileBasenameNoExtension}\\${fileBasenameNoExtension}.out",
           "/Fd:",
           "${workspaceFolder}\\build\\debug\\${fileBasenameNoExtension}\\vc140.pdb",
           "/Fo:",
