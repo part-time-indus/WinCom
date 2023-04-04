@@ -2,6 +2,10 @@
 #include<objbase.h>
 using namespace std;
 
+void trace(char* msg) {
+    cout << msg << endl;
+}
+
 interface IX
 {
         virtual void __stdcall Fx1() = 0;
@@ -35,17 +39,17 @@ class CA: public IX, public IY
 };
 
 int main(){
-    cout << "Program begins." << endl;
-    cout << "Creating CA class instanance" << endl;
+    trace("Program begins");
+    trace("Creating CA instance");
     CA* ca_inst = new CA();
-    cout << "Interface IX" << endl;
+    trace("Interface IX");
     IX* ix_inst = ca_inst;
-    cout << "Calling Fx1" << endl;
+    trace("Calling Fx1");
     ix_inst->Fx1();
-    cout << "Calling Fx2" << endl;
+    trace("Calling Fx2");
     ix_inst->Fx2();
 
-    cout << "Iterface IY" << endl;
+    trace("Interface IY");
     IY* iy_inst = ca_inst;
     cout << "Calling Fy1" << endl;
     iy_inst->Fy1();
