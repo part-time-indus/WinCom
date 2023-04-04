@@ -2,18 +2,27 @@
     "version": "2.0.0",
     "tasks": [
       {
+        "label": "create dir",
+        "type": "shell",
+        "windows": {
+            "command": "cmd",
+            "args": ["/C", "if not exist ${workspaceFolder}\\build\\debug\\${fileBasenameNoExtension} mkdir ${workspaceFolder}\\build\\debug\\${fileBasenameNoExtension}"]
+        }
+      },
+      {
         "type":"shell",
         "label": "build",
+        "dependsOn": ["create dir"],
         "command": "cl.exe",
         "args": [
           "/Zi",
           "/EHsc",
           "/Fe:",
-          "${workspaceFolder}\\build\\debug\\${fileBasenameNoExtension}.exe",
+          "${workspaceFolder}\\build\\debug\\${fileBasenameNoExtension}\\${fileBasenameNoExtension}.exe",
           "/Fd:",
-          "${workspaceFolder}\\build\\debug\\vc140.pdb",
+          "${workspaceFolder}\\build\\debug\\${fileBasenameNoExtension}\\vc140.pdb",
           "/Fo:",
-          "${workspaceFolder}\\build\\debug\\${fileBasenameNoExtension}.obj",
+          "${workspaceFolder}\\build\\debug\\${fileBasenameNoExtension}\\${fileBasenameNoExtension}.obj",
           "${file}"
         ],
         "problemMatcher": ["$msCompile"],
