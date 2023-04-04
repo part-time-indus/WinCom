@@ -9,7 +9,11 @@
           "/Zi",
           "/EHsc",
           "/Fe:",
-          "${workspaceFolder}\\build\\${fileBasenameNoExtension}.exe",
+          "${workspaceFolder}\\build\\debug\\${fileBasenameNoExtension}.exe",
+          "/Fd:",
+          "${workspaceFolder}\\build\\debug\\vc140.pdb",
+          "/Fo:",
+          "${workspaceFolder}\\build\\debug\\${fileBasenameNoExtension}.obj",
           "${file}"
         ],
         "problemMatcher": ["$msCompile"],
