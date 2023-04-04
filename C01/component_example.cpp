@@ -57,6 +57,8 @@ int main(){
     iy_inst->Fy2();
 
     cout << "Program Ends" << endl;
+
+    delete ca_inst;
     return(0);
 }
 
