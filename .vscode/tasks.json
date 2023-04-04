@@ -9,7 +9,7 @@
           "/Zi",
           "/EHsc",
           "/Fe:",
-          "${fileDirname}\\${fileBasenameNoExtension}.exe",
+          "${workspaceFolder}\\build\\${fileBasenameNoExtension}.exe",
           "${file}"
         ],
         "problemMatcher": ["$msCompile"],

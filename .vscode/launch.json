@@ -6,7 +6,7 @@
             "type": "cppdbg",
             "preLaunchTask": "build",
             "request": "launch",
-            "program": "${workspaceFolder}/C01/component_example.exe",
+            "program": "${workspaceFolder}/build/component_example.exe",
             "args": [],
             "stopAtEntry": false,
             "cwd": "${fileDirname}",
