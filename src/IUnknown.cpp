@@ -95,6 +95,14 @@ int main(){
         pIY->Fy();
     }
 
+    trace("Client:  Get interface IX from interface IY");
+    IX* pIX2 = NULL;
+    hr = pIY->QueryInterface(IID_IX, (void**) &pIX2);
+    if(SUCCEEDED(hr)){
+        trace("Client:  Succeeded getting interface IX from interface IY");
+        pIX2->Fx();
+    }
+
     trace("Client:  Asked for unsupported interface");
     IZ* pIZ= NULL;
     hr = pIUnknown->QueryInterface(IID_IZ, (void**) &pIZ);
@@ -122,13 +130,19 @@ int main(){
     if(SUCCEEDED(hr)){
         cout << "Are the IUnknown pointer equal? " << endl;
         if(pIUnknownFromIY == pIUnknown){
-            cout << "pIUnknownFromIY:   " << pIUnknownFromIY << endl;
-            cout << "pIUnknown:    " << pIUnknown << endl;
             cout << "Yes, pIUnknownFromIY == pIUnknown." << endl;
         }else{
             cout << "No. pIUnknownFromIY != pIUnknown." << endl; 
         }
     }
+
+    trace("All interface pointer.\n");
+    cout << "pIX:   " << pIX << endl;
+    cout << "pIX2:  " << pIX2 << endl;
+    cout << "pIY:   " << pIY << endl;
+    cout << "pIZ:   " << pIZ << endl;
+    cout << "pIYfromIX: " << pIYfromIX << endl;
+    cout << "pIUnknownFromIY:   " << pIUnknownFromIY << endl;
     delete pIUnknown;
     return(0);
 }
