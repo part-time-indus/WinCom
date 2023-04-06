@@ -33,5 +33,10 @@
 
 
 #Debugging
-*.ilk
 *.pdb
+
+#Linking
+*.ilk
+
+#Export/Import function file
+*.exp
