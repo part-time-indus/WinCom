@@ -31,19 +31,15 @@ CA::~CA(){
 HRESULT __stdcall CA::QueryInterface(const IID& iid, void** ppv){
     if(iid == IID_IUnknown){
         trace("QueryInterface:  Return pointer to IUnknown");
-        *ppv = static_cast<IX*>(*ppv);
+        *ppv = static_cast<IX*>(this);
 
     }else if(iid == IID_IX){
         trace("QueryInterface:  Return pointer to IX");
-        *ppv = static_cast<IX*>(*ppv);
+        *ppv = static_cast<IX*>(this);
 
     }else if(iid == IID_IY){
         trace("QueryInterface:  Return pointer to IY");
-        *ppv = static_cast<IY*>(*ppv);
-    }else if(iid == IID_IZ){
-        trace("QueryInterface:  Return pointer to IZ");
-        *ppv = static_cast<IZ*>(*ppv);
-
+        *ppv = static_cast<IY*>(this);
     }else{
         trace("QueryInterface:  Not supported");
         *ppv = NULL;
