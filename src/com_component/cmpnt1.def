@@ -1,0 +1,5 @@
+;
+;Cmpnt1 module definition file
+
+LIBRARY     cmpnt1.dll
+EXPORTS     CreateInstance @1    PRIVATE
