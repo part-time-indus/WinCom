@@ -4,7 +4,11 @@
       {
         "type":"shell",
         "label": "final build",
+    
+          //NOTE: dependsOn run all tasks in parallel by default
+          //Use dependsOnOrder to make it sequential
         "dependsOn": ["create dir", "build guids", "build create", "link create", "build cmpnt","build cmpnt dll", "build client"],
+        "dependsOrder": "sequence",
         "command": "link.exe",
         "args": [
           "/PDB:${workspaceFolder}\\build\\debug\\com_cmpnt\\vc140.pdb",
@@ -44,7 +48,7 @@
           "/D_DEBUG",
           "/EHsc",
           "/Fe:${workspaceFolder}\\build\\debug\\com_cmpnt\\guids.out",
-          "/Fd:{workspaceFolder}\\build\\debug\\com_cmpnt\\vc140.pdb",
+          "/Fd:${workspaceFolder}\\build\\debug\\com_cmpnt\\vc140.pdb",
           "/Fo:${workspaceFolder}\\build\\debug\\com_cmpnt\\guids.obj",
           "${workspaceFolder}\\src\\com_component\\guids.cpp"
         ],
