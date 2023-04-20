@@ -3,7 +3,8 @@
 
 
 void CLSIDtoChar(GUID, char*);
-     //Add the component to the windows registry
+void CreateKey();
+//Add the component to the windows registry
 //Remove the component from the windows registry
 
 
@@ -28,6 +29,37 @@ void CLSIDtoChar(GUID clsid, char* clsid_str){
 // );
 // LPOESTR is wide char type, use wcstombs_s to convert to multibyte string UTF-8? 
 
+
+void CreateKey(char* subkey, char* value, char* name){
+    HKEY parent = HKEY_CLASSES_ROOT;
+    HKEY created_key;
+    LSTATUS result = RegCreateKeyExA(
+        parent,
+        subkey,
+        0,
+        NULL,
+        REG_OPTION_NON_VOLATILE,
+        KEY_ALL_ACCESS,
+        NULL,
+        &created_key,
+        NULL
+    );
+
+    if(result == ERROR_SUCCESS){
+        RegSetValueExA(
+            created_key,
+            name,
+            0,
+            REG_SZ,
+            (const byte*) value,
+            sizeof(value)/sizeof(byte)
+        );
+    }
+    RegCloseKey(created_key);
+    
+
+
+}
 
 //  2. Create a key and set its value
 //RegCreateKeyEx function creates a key
