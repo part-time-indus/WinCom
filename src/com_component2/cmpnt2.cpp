@@ -73,7 +73,7 @@ ULONG __stdcall CA::Release(){
         delete this;
         return 0;
     }
-    return m_cRef
+    return m_cRef;
 
 }
 
