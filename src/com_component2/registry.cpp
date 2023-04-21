@@ -1,69 +1,95 @@
 #include<stdio.h>
 #include<objbase.h>
+#include<assert.h>
 
 
-void CLSIDtoChar(GUID, char*);
-void CreateKey();
+void CLSIDtoChar(const CLSID&, char*);
+BOOL CreateKey(const char*, const char*, const char*);
+LONG RecursiveDeleteKey(HKEY, const char*);
 //Add the component to the windows registry
 //Remove the component from the windows registry
 
 
-void CLSIDtoChar(GUID clsid, char* clsid_str){
+//Helper Functions to register and unregister server
+void CLSIDtoChar(const CLSID& clsid, char* szCLSID){
+    // assert(length >= 39);
     HRESULT hr;
-    wchar_t clsid_wstr[39];
-    hr = StringFromCLSID(clsid, (LPOLESTR* )clsid_wstr);
-    if(SUCCEEDED(hr)){
-        size_t converted;
-        wcstombs_s(&converted, clsid_str, sizeof(clsid_str)/sizeof(char), (const wchar_t*) &clsid_wstr, sizeof(clsid_wstr)/sizeof(char));
-    }
-    CoTaskMemFree(clsid_wstr);
-
+    LPOLESTR wszCLSID = NULL;
+    hr = StringFromCLSID(clsid, &wszCLSID);
+    assert(SUCCEEDED(hr));
+    size_t converted;
+    errno_t wsz_to_sz = wcstombs_s(&converted, szCLSID, sizeof(szCLSID)/sizeof(char), (const wchar_t*) &wszCLSID, sizeof(wszCLSID)/sizeof(char));
+    assert(wsz_to_sz==0);
+    CoTaskMemFree(wszCLSID);
 }
 
-//  1. Convert CLSID to char string - CLSID is a struct
-//This function will take a pointer to a char as an argument
-//There are 38 characters in the resulting string + null terminator
-//HRESULT StringFromCLSID(
-//   [in]  REFCLSID rclsid,
-//   [out] LPOLESTR *lplpsz
-// );
-// LPOESTR is wide char type, use wcstombs_s to convert to multibyte string UTF-8? 
 
-
-void CreateKey(char* subkey, char* value, char* name){
+BOOL CreateKey(const char* szKey, const char* szSubKey, const char* szValue){
+    HKEY hKey;
+    char szKeyBuf[1024];
     HKEY parent = HKEY_CLASSES_ROOT;
-    HKEY created_key;
-    LSTATUS result = RegCreateKeyExA(
+    errno_t cpyResult = strcpy_s(szKeyBuf, sizeof(szKeyBuf)/sizeof(char), szKey);
+    assert(cpyResult == 0);
+    if(szSubKey != NULL){
+        errno_t catResult;
+        catResult = strcat_s(szKeyBuf, sizeof(szKeyBuf)/sizeof(char), "\\");
+        assert(catResult == 0);
+        catResult = strcat_s(szKeyBuf, sizeof(szKeyBuf)/sizeof(char), szSubKey);
+        assert(catResult == 0);
+    }
+    LSTATUS lResult = RegCreateKeyExA(
         parent,
-        subkey,
+        szKeyBuf,
         0,
         NULL,
         REG_OPTION_NON_VOLATILE,
         KEY_ALL_ACCESS,
         NULL,
-        &created_key,
+        &hKey,
         NULL
     );
 
-    if(result == ERROR_SUCCESS){
+    if(lResult != ERROR_SUCCESS){
+        return false;
+    }
+
+    if(szValue != NULL){
         RegSetValueExA(
-            created_key,
-            name,
+            hKey,
+            NULL,
             0,
             REG_SZ,
-            (const byte*) value,
-            sizeof(value)/sizeof(byte)
+            (BYTE*) szValue,
+            sizeof(szValue)/sizeof(BYTE)
         );
     }
-    RegCloseKey(created_key);
     
-
-
+    RegCloseKey(hKey);
 }
+ 
+LONG RecursiveDeleteKey(HKEY parentKey, const char* childKey){
+    DWORD subkeyBufSize = 256;
+    char subKey[256];
+    FILETIME time;
+    HKEY hKey;
 
-//  2. Create a key and set its value
-//RegCreateKeyEx function creates a key
-//RegSetValue function sets key value
+    LSTATUS lResult = RegOpenKeyExA(parentKey,childKey,0,KEY_ALL_ACCESS,&hKey);
+    if(lResult != ERROR_SUCCESS){
+        return lResult;
+    }
+    while(RegEnumKeyExA(hKey,0,subKey,&subkeyBufSize,NULL,NULL,NULL,&time) == ERROR_SUCCESS){
+        lResult = RecursiveDeleteKey(hKey, subKey);
+        if(lResult != ERROR_SUCCESS){
+            RegCloseKey(hKey);
+            return lResult;
+        }
+        RegDeleteKeyA(hKey, subKey);
+        subkeyBufSize = 256;
+
+    }
+    RegCloseKey(hKey);
+    RegDeleteKeyA(parentKey, childKey);
+}
 
 
 //  3. Delete a key and all its components
