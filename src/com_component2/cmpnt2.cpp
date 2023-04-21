@@ -1,4 +1,5 @@
 #include<objbase.h>
+#include "guids.cpp"
 
 
 interface IX: public IUnknown{
