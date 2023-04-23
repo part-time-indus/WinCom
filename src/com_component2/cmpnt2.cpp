@@ -4,6 +4,7 @@
 
 
 static long g_cComponents = 0 ; 
+static long g_cServerlock = 0;
 
 void trace(const char* msg){
     std::cout << msg << std::endl;
@@ -93,14 +94,16 @@ class CFactory: public IClassFactory{
         virtual HRESULT __stdcall QueryInterface(const IID& iid, void** ppv);
         virtual ULONG __stdcall AddRef();
         virtual ULONG __stdcall Release();
-        virtual HRESULT __stdcall CreateInstance(IUnknown* pUnkOuter, IID& iid, void** ppv);
-        virtual HRESULT __stdcall LockServer(BOOL fLock);
+        virtual HRESULT __stdcall CreateInstance(IUnknown* pUnkOuter, const IID& iid, void** ppv);
+        virtual HRESULT __stdcall LockServer(BOOL bLock);
     private:
         long m_cRef;
 };
 
 CFactory::CFactory():m_cRef(1){}
-CFactory::~CFactory(){}
+CFactory::~CFactory(){
+    trace("Class factory:\t\tDestroy self.");
+}
 
 HRESULT __stdcall CFactory::QueryInterface(const IID& iid, void** ppv){
     if(iid == IID_IUnknown){
@@ -128,7 +131,7 @@ ULONG __stdcall CFactory::Release(){
     return m_cRef;
 }
 
-HRESULT __stdcall CFactory::CreateInstance(IUnknown* pUnkOuter, IID& iid, void** ppv){
+HRESULT __stdcall CFactory::CreateInstance(IUnknown* pUnkOuter, const IID& iid, void** ppv){
     trace("Class Factory:\t\tCreate Component");
     if(pUnkOuter != NULL){
         return CLASS_E_NOAGGREGATION;
@@ -140,5 +143,52 @@ HRESULT __stdcall CFactory::CreateInstance(IUnknown* pUnkOuter, IID& iid, void**
     HRESULT hr = pA->QueryInterface(iid, ppv);
     pA->Release();
     return hr;
+}
+
+HRESULT __stdcall CFactory::LockServer(BOOL bLock){
+    if(bLock){
+        InterlockedIncrement(&g_cServerlock);
+    }else{
+        InterlockedDecrement(&g_cServerlock);
+    }
+
+    return S_OK;
+
+}
+
+HRESULT DllCanUnloadNow(){
+    if(g_cServerlock == 0 && g_cComponents == 0){
+        return S_OK;
+    }else{
+        return S_FALSE;
+    }
+}
+
+HRESULT DllGetClassObject(CLSID rclsid, IID riid, void** ppv){
+    if(rclsid != CLSID_Component1){
+        *ppv = NULL;
+        return CLASS_E_CLASSNOTAVAILABLE;
+    }
+    HRESULT hr;
+    CFactory* Cfactory = new CFactory;
+    if(Cfactory == NULL){
+        return E_OUTOFMEMORY;
+    }   
+    hr = Cfactory->QueryInterface(IID_IClassFactory, ppv);
+    Cfactory->Release();
+    return hr;
+}
+
+
+STDAPI DllRegisterServer(){
+    return 0;
+}
+
+STDAPI DllUnregisterServer(){
+    return 0;
+}
+
+BOOL WINAPI DllMain(){
+    return true;
 
 }
