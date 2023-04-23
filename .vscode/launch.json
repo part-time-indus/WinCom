@@ -9,7 +9,7 @@
             "preLaunchTask": "final build",
             "request": "launch",
             "name": "Debug",
-            "program": "${workspaceFolder}\\build\\debug\\com_cmpnt\\client1.exe",
+            // "program": "${workspaceFolder}\\build\\debug\\com_cmpnt\\client1.exe",
             "args": [],
             "cwd": "${workspaceFolder}"
         }

@@ -8,30 +8,20 @@
           //NOTE: dependsOn run all tasks in parallel by default
           //Use dependsOnOrder to make it sequential
         // "dependsOn": ["create dir", "build guids", "build create", "link create", "build cmpnt2","build cmpnt2 dll", "build client"],
-        "dependsOn": ["create dir"],
+        "dependsOn": ["create dir", "build guids", "build registry", "build cmpnt2"],
         "dependsOrder": "sequence",
         // "command": "link.exe",
         "command": "cl.exe",
         "args": [
-          // "/PDB:${workspaceFolder}\\build\\debug\\com_cmpnt2\\vc140.pdb",
-          // "/DEBUG",
-          // "/OUT:${workspaceFolder}\\build\\debug\\com_cmpnt2\\client1.exe",
-          // "${workspaceFolder}\\build\\debug\\com_cmpnt2\\client1.obj",
-          // "${workspaceFolder}\\build\\debug\\com_cmpnt2\\create.obj",
-          // "${workspaceFolder}\\build\\debug\\com_cmpnt2\\guids.obj",
-          // "User32.lib",
-          // "UUID.lib",.
-          "/Zi",
-          "/FS",
-          "/c",
-          "/MTd",
-          "/Od",
-          "/D_DEBUG",
-          "/EHsc",
-          "/Fe:${workspaceFolder}\\build\\debug\\com_cmpnt2\\registry.out",
-          "/Fd:${workspaceFolder}\\build\\debug\\com_cmpnt2\\vc140.pdb",
-          "/Fo:${workspaceFolder}\\build\\debug\\com_cmpnt2\\registry.obj",
-          "${workspaceFolder}\\src\\com_component2\\registry.cpp"
+          "/PDB:${workspaceFolder}\\build\\debug\\com_cmpnt2\\vc140.pdb",
+          "/DEBUG",
+          "/OUT:${workspaceFolder}\\build\\debug\\com_cmpnt2\\client1.exe",
+          "${workspaceFolder}\\build\\debug\\com_cmpnt2\\client1.obj",
+          "${workspaceFolder}\\build\\debug\\com_cmpnt2\\create.obj",
+          "${workspaceFolder}\\build\\debug\\com_cmpnt2\\guids.obj",
+          "User32.lib",
+          "UUID.lib",
+
         ],
         "problemMatcher": ["$msCompile"],
         "group": {
@@ -74,7 +64,7 @@
       },
       {
         "type":"shell",
-        "label": "build cmpnt2",
+        "label": "build registry",
         "command": "cl.exe",
         "args": [
           "/Zi",
@@ -108,10 +98,10 @@
           "/Od",
           "/D_DEBUG",
           "/EHsc",
-          "/Fe:${workspaceFolder}\\build\\debug\\com_cmpnt2\\cmpnt1.out",
+          "/Fe:${workspaceFolder}\\build\\debug\\com_cmpnt2\\cmpnt2.out",
           "/Fd:${workspaceFolder}\\build\\debug\\com_cmpnt2\\vc140.pdb",
-          "/Fo:${workspaceFolder}\\build\\debug\\com_cmpnt2\\cmpnt1.obj",
-          "${workspaceFolder}\\src\\com_component2\\cmpnt1.cpp"
+          "/Fo:${workspaceFolder}\\build\\debug\\com_cmpnt2\\cmpnt2.obj",
+          "${workspaceFolder}\\src\\com_component2\\cmpnt2.cpp"
         ],
         "problemMatcher": ["$msCompile"],
         "group": {
