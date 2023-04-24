@@ -6,10 +6,10 @@
     "configurations": [
         {
             "type": "lldb",
-            "preLaunchTask": "final build",
+            "preLaunchTask": "main build",
             "request": "launch",
             "name": "Debug",
-            // "program": "${workspaceFolder}\\build\\debug\\com_cmpnt\\client1.exe",
+            "program": "${workspaceFolder}\\build\\debug\\com_cmpnt2\\client.exe",
             "args": [],
             "cwd": "${workspaceFolder}"
         }
