@@ -1,24 +1,89 @@
-#include<stdio.h>
-#include<objbase.h>
 #include<assert.h>
+#include "Registry.h"
 
 
-void CLSIDtoChar(const CLSID&, char*);
-BOOL CreateKey(const char*, const char*, const char*);
-LONG RecursiveDeleteKey(HKEY, const char*);
-//Add the component to the windows registry
-//Remove the component from the windows registry
+
+const int CLSID_STRING_SIZE = 39 ;
+
+HRESULT RegisterServer(HMODULE hModule, const CLSID& clsid, const char* szKeyFriendlyName, const char* szVerIndProgId, const char* szProgId){
+
+    //Get server location
+    char szModule[512];
+    DWORD nSize = 512;
+    DWORD lResult = GetModuleFileNameA(hModule,szModule,nSize);
+
+    assert(lResult != 0);
+
+    //Convert clsid to char
+
+    char szCLSID[CLSID_STRING_SIZE];
+    CLSIDtoChar(clsid, szCLSID, CLSID_STRING_SIZE);
+
+    //Build the key "CLSID\\"
+    char szKey[64];
+    size_t szBuf = 64;
+    errno_t sResult = strcpy_s(szKey,szBuf,"CLSID\\");
+
+    assert(sResult == 0);
+    sResult = strcat_s(szKey,szBuf,szCLSID);
+    assert(sResult == 0);
+
+    //Add CLSID to the registry
+    CreateKey(szKey, NULL, szKeyFriendlyName);
+
+    //Add the server filename subkey under CLSID
+    CreateKey(szKey, "InprocServer32", szModule);
+
+    //Add ProgId subkey under CLSID
+    CreateKey(szKey, "ProgId", szProgId);
+
+    //Add Version Independent ProgId subkey under CLSID
+    CreateKey(szKey, "VersionIndependentProgId", szVerIndProgId);
+
+    //Add version Independent ProgId subkey under HKEY_CLASSES_ROOT
+    CreateKey("VersionIndependentProgId", NULL, szKeyFriendlyName);
+    CreateKey("VersionIndependentProgId", "CLSID", szCLSID);
+    CreateKey("VersionIndependentProgID", "CurVer", szProgId);
+
+    //Add versioned ProgId subkey under HKEY_CLASSES_ROOT
+    CreateKey("ProgId",NULL, szKeyFriendlyName);
+    CreateKey("ProgId","CLSID", szCLSID);
+    return S_OK;
+}
+
+LONG UnregisterServer(CLSID& clsid, const char* szVerIndProgId, const char* szProgId){
+    char szCLSID[CLSID_STRING_SIZE];
+    char szKey[64];
+    long szBuf = 64;
+    HKEY parentKey = HKEY_CLASSES_ROOT;
+    CLSIDtoChar(clsid, szCLSID, CLSID_STRING_SIZE);
+    errno_t sResult = strcpy_s(szKey,szBuf,"CLSID\\");
+    assert(sResult == 0);
+    sResult = strcat_s(szKey,szBuf,szCLSID);
+    assert(sResult == 0);
+
+    LONG lResult = RecursiveDeleteKey(parentKey, szCLSID);
+    assert(lResult == ERROR_SUCCESS || lResult == ERROR_FILE_NOT_FOUND);
+    RecursiveDeleteKey(parentKey, szVerIndProgId);
+    assert(lResult == ERROR_SUCCESS || lResult == ERROR_FILE_NOT_FOUND);
+    RecursiveDeleteKey(parentKey, szProgId);
+    assert(lResult == ERROR_SUCCESS || lResult == ERROR_FILE_NOT_FOUND);
+    return S_OK;
+
+}
+
+
 
 
 //Helper Functions to register and unregister server
-void CLSIDtoChar(const CLSID& clsid, char* szCLSID){
-    // assert(length >= 39);
+void CLSIDtoChar(const CLSID& clsid, char* szCLSID, int length){
+    assert(length >= 39);
     HRESULT hr;
     LPOLESTR wszCLSID = NULL;
     hr = StringFromCLSID(clsid, &wszCLSID);
     assert(SUCCEEDED(hr));
     size_t converted;
-    errno_t wsz_to_sz = wcstombs_s(&converted, szCLSID, sizeof(szCLSID)/sizeof(char), (const wchar_t*) &wszCLSID, sizeof(wszCLSID)/sizeof(char));
+    errno_t wsz_to_sz = wcstombs_s(&converted, szCLSID, sizeof(szCLSID)/sizeof(char), (const wchar_t*) &wszCLSID, length);
     assert(wsz_to_sz==0);
     CoTaskMemFree(wszCLSID);
 }
@@ -91,8 +156,4 @@ LONG RecursiveDeleteKey(HKEY parentKey, const char* childKey){
     RegDeleteKeyA(parentKey, childKey);
 }
 
-
-//  3. Delete a key and all its components
-//RegEnumKeyEx enumerates subkeys of a key
-//RegDeleteKeyEx deletes key and its values
 
