@@ -86,6 +86,7 @@ void CLSIDtoChar(const CLSID& clsid, char* szCLSID, int length){
     errno_t wsz_to_sz = wcstombs_s(&converted, szCLSID, sizeof(szCLSID)/sizeof(char), (const wchar_t*) &wszCLSID, length);
     assert(wsz_to_sz==0);
     CoTaskMemFree(wszCLSID);
+
 }
 
 
@@ -130,6 +131,7 @@ BOOL CreateKey(const char* szKey, const char* szSubKey, const char* szValue){
     }
     
     RegCloseKey(hKey);
+    return true;
 }
  
 LONG RecursiveDeleteKey(HKEY parentKey, const char* childKey){
@@ -153,7 +155,7 @@ LONG RecursiveDeleteKey(HKEY parentKey, const char* childKey){
 
     }
     RegCloseKey(hKey);
-    RegDeleteKeyA(parentKey, childKey);
+    return RegDeleteKeyA(parentKey, childKey);
 }
 
 
