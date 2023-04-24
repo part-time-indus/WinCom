@@ -3,8 +3,13 @@
 #include "guids.cpp"
 
 
+static HMODULE g_hModule = NULL;
 static long g_cComponents = 0 ; 
 static long g_cServerlock = 0;
+
+const char g_szFriendlyName[] = "Inside COM, Chapter 7 Example";
+const char g_szVerIndProgId[] = "InsideCom.Ch07";
+const char g_szProgId[] = "InsideCom.Ch07.1";
 
 void trace(const char* msg){
     std::cout << msg << std::endl;
