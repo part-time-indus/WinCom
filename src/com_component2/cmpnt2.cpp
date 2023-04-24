@@ -1,7 +1,6 @@
 #include<iostream>
-#include<objbase.h>
-#include "guids.cpp"
-
+#include "registry.h"
+#include "Iface.h"
 
 static HMODULE g_hModule = NULL;
 static long g_cComponents = 0 ; 
@@ -14,15 +13,6 @@ const char g_szProgId[] = "InsideCom.Ch07.1";
 void trace(const char* msg){
     std::cout << msg << std::endl;
 }
-
-interface IX: public IUnknown{
-    virtual void Fx() = 0;
-};
-
-interface IY: public IUnknown{
-    virtual void Fy() = 0;
-
-};
 
 
 class CA: public IX, public IY{
@@ -186,14 +176,17 @@ HRESULT DllGetClassObject(CLSID rclsid, IID riid, void** ppv){
 
 
 STDAPI DllRegisterServer(){
-    return 0;
+    return RegisterServer(g_hModule, CLSID_Component1, g_szFriendlyName, g_szVerIndProgId, g_szProgId);
 }
 
 STDAPI DllUnregisterServer(){
-    return 0;
+    //Its they value(filepath of component dll) for the inprocserver32 subkey for component CLSID
+    return UnregisterServer(CLSID_Component1, g_szVerIndProgId, g_szProgId);
 }
 
-BOOL WINAPI DllMain(){
+BOOL WINAPI DllMain(HINSTANCE hinstDLL, DWORD fdwReason, LPVOID lpvReserved){
+    if(fdwReason == DLL_PROCESS_ATTACH){
+        g_hModule = hinstDLL;
+    }
     return true;
-
 }
