@@ -51,7 +51,7 @@ HRESULT RegisterServer(HMODULE hModule, const CLSID& clsid, const char* szKeyFri
     return S_OK;
 }
 
-LONG UnregisterServer(CLSID& clsid, const char* szVerIndProgId, const char* szProgId){
+LONG UnregisterServer(const CLSID& clsid, const char* szVerIndProgId, const char* szProgId){
     char szCLSID[CLSID_STRING_SIZE];
     char szKey[64];
     long szBuf = 64;
