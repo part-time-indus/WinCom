@@ -83,7 +83,9 @@ void CLSIDtoChar(const CLSID& clsid, char* szCLSID, int length){
     hr = StringFromCLSID(clsid, &wszCLSID);
     assert(SUCCEEDED(hr));
     size_t converted;
-    errno_t wsz_to_sz = wcstombs_s(&converted, szCLSID, sizeof(szCLSID)/sizeof(char), (const wchar_t*) &wszCLSID, length);
+    //sizeof only works for char[] and not char*
+    //Can strlen() be used for char*?
+    errno_t wsz_to_sz = wcstombs_s(&converted, szCLSID, length, (const wchar_t*) &wszCLSID, length);
     assert(wsz_to_sz==0);
     CoTaskMemFree(wszCLSID);
 
