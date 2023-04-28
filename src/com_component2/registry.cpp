@@ -41,13 +41,13 @@ HRESULT RegisterServer(HMODULE hModule, const CLSID& clsid, const char* szKeyFri
     CreateKey(szKey, "VersionIndependentProgId", szVerIndProgId);
 
     //Add version Independent ProgId subkey under HKEY_CLASSES_ROOT
-    CreateKey("VersionIndependentProgId", NULL, szKeyFriendlyName);
-    CreateKey("VersionIndependentProgId", "CLSID", szCLSID);
-    CreateKey("VersionIndependentProgID", "CurVer", szProgId);
+    CreateKey(szVerIndProgId, NULL, szKeyFriendlyName);
+    CreateKey(szVerIndProgId, "CLSID", szCLSID);
+    CreateKey(szVerIndProgId, "CurVer", szProgId);
 
     //Add versioned ProgId subkey under HKEY_CLASSES_ROOT
-    CreateKey("ProgId",NULL, szKeyFriendlyName);
-    CreateKey("ProgId","CLSID", szCLSID);
+    CreateKey(szProgId,NULL, szKeyFriendlyName);
+    CreateKey(szProgId,"CLSID", szCLSID);
     return S_OK;
 }
 
@@ -85,7 +85,7 @@ void CLSIDtoChar(const CLSID& clsid, char* szCLSID, int length){
     size_t converted;
     //sizeof only works for char[] and not char*
     //Can strlen() be used for char*?
-    errno_t wsz_to_sz = wcstombs_s(&converted, szCLSID, length, (const wchar_t*) &wszCLSID, length);
+    errno_t wsz_to_sz = wcstombs_s(&converted, szCLSID, length, wszCLSID, length);
     assert(wsz_to_sz==0);
     CoTaskMemFree(wszCLSID);
 
@@ -128,7 +128,7 @@ BOOL CreateKey(const char* szKey, const char* szSubKey, const char* szValue){
             0,
             REG_SZ,
             (BYTE*) szValue,
-            sizeof(szValue)/sizeof(BYTE)
+            strlen(szValue) + 1
         );
     }
     
