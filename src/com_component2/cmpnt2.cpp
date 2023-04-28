@@ -6,9 +6,11 @@ static HMODULE g_hModule = NULL;
 static long g_cComponents = 0 ; 
 static long g_cServerlock = 0;
 
+
 const char g_szFriendlyName[] = "Inside COM, Chapter 7 Example";
 const char g_szVerIndProgId[] = "InsideCom.Ch07";
 const char g_szProgId[] = "InsideCom.Ch07.1";
+
 
 void trace(const char* msg){
     std::cout << msg << std::endl;
@@ -74,11 +76,11 @@ ULONG __stdcall CA::Release(){
 }
 
 void CA::Fx(){
-    std::cout << "Fx Called";
+    std::cout << "Fx Called" << std::endl;
 }
 
 void CA::Fy(){
-    std::cout << "Fy Called";
+    std::cout << "Fy Called" << std::endl;
 }
 
 
