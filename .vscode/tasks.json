@@ -7,8 +7,7 @@
     
           //NOTE: dependsOn run all tasks in parallel by default
           //Use dependsOnOrder to make it sequential
-        // "dependsOn": ["create dir", "build guids", "build registry", "build cmpnt2", "build client", "build cmpnt2 dll"],
-        "dependsOn": ["build client"],
+        "dependsOn": ["create dir", "build guids", "build registry", "build cmpnt2", "build client", "build cmpnt2 dll"],
         "dependsOrder": "sequence",
         "command": "link.exe",
         "args": [
