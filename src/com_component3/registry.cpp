@@ -8,12 +8,11 @@ void trace(char* pMsg){
 }
 
 
-
 extern "C" void CLSIDtoChar(const CLSID& clsid, char* szCLSID, int length){
     LPOLESTR wszCLSID;
     HRESULT hr = StringFromCLSID(clsid,&wszCLSID);
     assert(hr == S_OK);
-    int sz_converted; 
-    errno_t err = wctomb_s(&sz_converted, szCLSID, length, *wszCLSID);
+    size_t sz_converted; 
+    errno_t err = wcstombs_s(&sz_converted, szCLSID, length, wszCLSID, length);
     assert(err == 0);
 }
