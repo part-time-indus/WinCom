@@ -1,5 +1,6 @@
 #include<iostream>
-#include "registry.h";
+#include "iface.h"
+#include "registry.h"
 int main(){
     const int szCLSIDlen = 39;
     char szCLSID[szCLSIDlen];
