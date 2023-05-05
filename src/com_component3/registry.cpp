@@ -15,6 +15,7 @@ extern "C" void CLSIDtoChar(const CLSID& clsid, char* szCLSID, int length){
     size_t sz_converted; 
     errno_t err = wcstombs_s(&sz_converted, szCLSID, length, wszCLSID, length);
     assert(err == 0);
+    CoTaskMemFree(wszCLSID);
 }
 
 extern "C" BOOL CreateKey(const char* key, const char* subkey, const char* value){
