@@ -58,3 +58,25 @@ extern "C" BOOL CreateKey(const char* key, const char* subkey, const char* value
     RegCloseKey(hKey);
     return true;
 }
+
+
+extern "C" LONG RecursiveDeleteKey(HKEY hKey, const char* subkey){
+    HKEY szKey;
+    LSTATUS lResult = RegOpenKeyExA(hKey, subkey, 0, KEY_ALL_ACCESS, &szKey);
+    if(lResult != ERROR_SUCCESS){
+        return lResult;
+    }
+    char szSubkey[256];
+    DWORD dwSize = 256;
+    FILETIME* lpLastWriteTime;
+    while(RegEnumKeyExA(szKey, 0, szSubkey,&dwSize,NULL,NULL,NULL,lpLastWriteTime) == ERROR_SUCCESS){
+        lResult = RecursiveDeleteKey(szKey, szSubkey);
+        if(lResult != ERROR_SUCCESS){
+            RegCloseKey(szKey);
+            return lResult;
+        }
+        dwSize = 256; 
+    }
+    RegCloseKey(szKey);
+    return RegDeleteKeyA(hKey, subkey);
+} 
