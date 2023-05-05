@@ -26,13 +26,14 @@
       {
         "type":"shell",
         "label": "main build",
-        "dependsOn": ["create dir", "build guids", "build registry",],
+        "dependsOn": ["create dir", "build guids", "build registry", "build client"],
         "dependsOrder": "sequence",
         "command": "link.exe",
         "args": [
           "/DEBUG", 
           "/OUT:${workspaceFolder}\\build\\debug\\com_cmpnt3\\client.exe",
           "${workspaceFolder}\\build\\debug\\com_cmpnt3\\client.obj",
+          "${workspaceFolder}\\build\\debug\\com_cmpnt3\\registry.obj",
           "${workspaceFolder}\\build\\debug\\com_cmpnt3\\guids.obj",
           "UUID.lib",
           "Advapi32.lib",
@@ -50,7 +51,7 @@
         "type": "shell",
         "windows": {
             "command": "cmd",
-            "args": ["/C", "if not exist ${workspaceFolder}\\build\\debug\\com_cmpnt3 mkdir ${workspaceFolder}\\build\\debug\\com_cmpnt2"]
+            "args": ["/C", "if not exist ${workspaceFolder}\\build\\debug\\com_cmpnt3 mkdir ${workspaceFolder}\\build\\debug\\com_cmpnt3"]
         }
       },
       {
