@@ -9,7 +9,7 @@ void trace(char* pMsg){
 
 
 
-void CLSIDtoChar(const CLSID& clsid, char* szCLSID, int length){
+extern "C" void CLSIDtoChar(const CLSID& clsid, char* szCLSID, int length){
     LPOLESTR wszCLSID;
     HRESULT hr = StringFromCLSID(clsid,&wszCLSID);
     assert(hr == S_OK);
