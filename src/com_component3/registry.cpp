@@ -20,10 +20,10 @@ extern "C" void CLSIDtoChar(const CLSID& clsid, char* szCLSID, int length){
 
 extern "C" BOOL CreateKey(const char* key, const char* subkey, const char* value){
     char szKey[1024];
-    size_t key_len = 1024;
-    errno_t eResult = strcpy_s(szKey, key_len, key);
+    size_t dwSize = 1024;
+    errno_t eResult = strcpy_s(szKey, dwSize, key);
     assert(eResult == 0);
-    eResult = strcat_s(szKey, key_len, "\\");
+    eResult = strcat_s(szKey, dwSize, "\\");
     assert(eResult == 0);
     if(subkey != NULL){
         eResult = strcat_s(szKey, 64, subkey);
