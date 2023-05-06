@@ -43,6 +43,25 @@ extern "C" HRESULT RegisterDll(HMODULE hModule, const CLSID& clsid, const char* 
 
 }
 
+extern "C" HRESULT UnregisterDll(const CLSID& clsid, const char* szProgName, const char* szVerIndProgName){
+    char szKey[64];
+    char szCLSID[CLSID_STRLEN];
+    CLSIDtoChar(clsid, szCLSID, CLSID_STRLEN);
+    errno_t eRes = strcpy_s(szKey, 64, "CLSID\\");
+    assert(eRes == 0);
+    eRes = strcat_s(szKey, 64, szCLSID);
+    assert(eRes == 0);
+    LONG res = RecursiveDeleteKey(HKEY_CLASSES_ROOT, szKey);
+    assert(res == ERROR_SUCCESS || res == ERROR_FILE_NOT_FOUND);
+    RecursiveDeleteKey(HKEY_CLASSES_ROOT, szProgName);
+    assert(res == ERROR_SUCCESS || res == ERROR_FILE_NOT_FOUND);
+    RecursiveDeleteKey(HKEY_CLASSES_ROOT, szVerIndProgName);
+    assert(res == ERROR_SUCCESS || res == ERROR_FILE_NOT_FOUND);
+
+    return S_OK;
+
+}
+
 
 
 
