@@ -26,7 +26,7 @@ extern "C" BOOL CreateKey(const char* key, const char* subkey, const char* value
     eResult = strcat_s(szKey, dwSize, "\\");
     assert(eResult == 0);
     if(subkey != NULL){
-        eResult = strcat_s(szKey, 64, subkey);
+        eResult = strcat_s(szKey, 1024, subkey);
         assert(eResult == 0);
 
     }
