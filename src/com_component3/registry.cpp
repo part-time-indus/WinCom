@@ -3,9 +3,47 @@
 #include<assert.h>
 
 
+const int CLSID_STRLEN = 39;
+
 void trace(char* pMsg){
     std::cout << pMsg << std::endl;
 }
+
+extern "C" HRESULT RegisterDll(HMODULE hModule, const CLSID& clsid, const char* szFriendlyName, const char* szVerIndProgName, const char* szProgName){
+    char szCLSID[CLSID_STRLEN];
+    char szKey[64];
+    char szFile[512];
+    CLSIDtoChar(clsid, szCLSID, CLSID_STRLEN);
+    errno_t eRes = strcpy_s(szKey,64,"CLSID\\");
+    assert(eRes == 0);
+    errno_t eRes = strcat_s(szKey, 64, szCLSID);
+    assert(eRes == 0);
+    DWORD hRes = GetModuleFileNameA(hModule, szFile, 512);
+    assert(hRes != 0);
+    
+    BOOL bRes = CreateKey(szKey, NULL, szFriendlyName);
+    assert(bRes == true);
+    bRes = CreateKey(szKey, "InProcServer32", szFile);
+    assert(bRes == true);
+    bRes = CreateKey(szKey, "ProgId", szProgName);
+    assert(bRes == true);
+    
+    bRes = CreateKey(szProgName, NULL, szFriendlyName);
+    assert(bRes == true);
+    bRes = CreateKey(szProgName, "CLSID", szCLSID);
+    assert(bRes == true);
+
+    bRes = CreateKey(szVerIndProgName, NULL, szFriendlyName);
+    assert(bRes == true);
+    bRes = CreateKey(szVerIndProgName, "CLSID", szCLSID);
+    assert(bRes == true);
+    bRes = CreateKey(szVerIndProgName, "CurrVer", szProgName);
+    assert(bRes == true);
+    return S_OK;
+
+}
+
+
 
 
 extern "C" void CLSIDtoChar(const CLSID& clsid, char* szCLSID, int length){
