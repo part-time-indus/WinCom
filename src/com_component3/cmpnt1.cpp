@@ -1,6 +1,6 @@
 #include<iostream>
 #include<objbase.h>
-#include "iface.h";
+#include "iface.h"
 
 void trace(char* pMsg){
     std::cout << pMsg << std::endl;
@@ -62,3 +62,5 @@ void CA::Fx(){
 void CA::Fy(){
     std::cout << "Fy called";
 }
+
+
