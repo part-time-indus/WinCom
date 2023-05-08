@@ -41,3 +41,16 @@ HRESULT __stdcall CA::QueryInterface(const IID& iid, void** ppv){
     reinterpret_cast<IUnknown*>(this)->AddRef();
     return S_OK;
 }
+
+ULONG __stdcall CA::AddRef(){
+    return InterlockedIncrement(&m_cRef);
+}
+
+ULONG __stdcall CA::Release(){
+    InterlockedDecrement(&m_cRef);
+    if(m_cRef == 0){
+        delete this;
+        return 0;
+    }
+    return m_cRef;
+}
