@@ -2,6 +2,10 @@
 #include<objbase.h>
 #include "iface.h"
 
+#define global static
+
+global long g_cComponents = 0;
+
 void trace(char* pMsg){
     std::cout << pMsg << std::endl;
 }
@@ -20,11 +24,13 @@ class CA: public IX, public IY{
 };
 
 CA::CA(): m_cRef(1){
+    InterlockedIncrement(&g_cComponents);
 
 }
 
 CA::~CA(){
     trace("Destroying itself");
+    InterlockedDecrement(&g_cComponents);
 }
 HRESULT __stdcall CA::QueryInterface(const IID& iid, void** ppv){
     trace("QueryInterface: Creating Interface");
