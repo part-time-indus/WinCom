@@ -175,6 +175,10 @@ HRESULT DllRegisterServer(){
 
 }
 
+HRESULT DllUnregisterServer(){
+    return UnregisterDLL(CLSID_COMPONENT1, g_szProgId, g_szVerIndProgId);
+}
+
 BOOL WINAPI DllMain(HINSTANCE hinstDLL, DWORD fdwReason, LPVOID lpvReserved){
     if(fdwReason == DLL_PROCESS_ATTACH){
         hModule = hinstDLL;
