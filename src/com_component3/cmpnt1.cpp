@@ -9,6 +9,12 @@ global long g_cComponents = 0;
 global long g_cServerLocks = 0;
 global HMODULE hModule;
 
+
+
+const char g_szFriendlyName[] = "Inside COM, Chapter 8 Example";
+const char g_szVerIndProgId[] = "InsideCom.Ch08";
+const char g_szProgId[] = "InsideCom.Ch08.1";
+
 void trace(char* pMsg){
     std::cout << pMsg << std::endl;
 }
@@ -162,6 +168,11 @@ HRESULT DllCanUnloadNow(){
         return S_OK;
     }
     return S_FALSE;
+}
+
+HRESULT DllRegisterServer(){
+    return RegisterDLL(hModule, CLSID_COMPONENT1, g_szFriendlyName, g_szVerIndProgId, g_szProgId);
+
 }
 
 BOOL WINAPI DllMain(HINSTANCE hinstDLL, DWORD fdwReason, LPVOID lpvReserved){
