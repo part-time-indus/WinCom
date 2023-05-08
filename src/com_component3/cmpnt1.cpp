@@ -1,6 +1,10 @@
+#include<iostream>
 #include<objbase.h>
 #include "iface.h";
 
+void trace(char* pMsg){
+    std::cout << pMsg << std::endl;
+}
 
 class CA: public IX, public IY{
     public:
@@ -15,3 +19,25 @@ class CA: public IX, public IY{
         long m_cRef;
 };
 
+CA::CA(): m_cRef(0){
+
+}
+
+CA::~CA(){
+    trace("Destroying itself");
+}
+HRESULT __stdcall CA::QueryInterface(const IID& iid, void** ppv){
+    trace("QueryInterface: Creating Interface");
+    *ppv = NULL;
+    if(iid == IID_IUnknown){
+        *ppv = static_cast<IX*>(this);
+    }else if(iid == IID_IX){
+        *ppv = static_cast<IX*>(this);
+    }else if(iid == IID_IY){
+        *ppv = static_cast<IY*>(this);
+    }else{
+        return E_NOINTERFACE;
+    }
+    reinterpret_cast<IUnknown*>(this)->AddRef();
+    return S_OK;
+}
