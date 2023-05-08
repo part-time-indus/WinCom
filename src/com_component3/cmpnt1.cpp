@@ -19,7 +19,7 @@ class CA: public IX, public IY{
         long m_cRef;
 };
 
-CA::CA(): m_cRef(0){
+CA::CA(): m_cRef(1){
 
 }
 
@@ -62,5 +62,7 @@ void CA::Fx(){
 void CA::Fy(){
     std::cout << "Fy called";
 }
+
+
 
 
