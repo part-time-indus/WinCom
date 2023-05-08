@@ -141,3 +141,16 @@ HRESULT __stdcall CFactory::LockServer(BOOL bLock){
     }
     return S_OK;
 }
+HRESULT DllGetClassObject(const CLSID& rclsid, const IID& riid, void** ppv){
+    *ppv = NULL;
+    if(rclsid != CLSID_COMPONENT1){
+        return CLASS_E_CLASSNOTAVAILABLE;
+    }
+    CFactory* cF = new CFactory;
+    if(cF == NULL){
+        return E_OUTOFMEMORY;
+    }
+    HRESULT hr = cF->QueryInterface(IID_IClassFactory, ppv);
+    cF->Release();
+    return hr;
+}
