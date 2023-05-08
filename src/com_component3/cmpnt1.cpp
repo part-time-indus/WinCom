@@ -1,11 +1,13 @@
 #include<iostream>
 #include<objbase.h>
 #include "iface.h"
+#include "registry.h"
 
 #define global static
 
 global long g_cComponents = 0;
 global long g_cServerLocks = 0;
+global HMODULE hModule;
 
 void trace(char* pMsg){
     std::cout << pMsg << std::endl;
@@ -160,4 +162,13 @@ HRESULT DllCanUnloadNow(){
         return S_OK;
     }
     return S_FALSE;
+}
+
+BOOL WINAPI DllMain(HINSTANCE hinstDLL, DWORD fdwReason, LPVOID lpvReserved){
+    if(fdwReason == DLL_PROCESS_ATTACH){
+        hModule = hinstDLL;
+        return true;
+    }
+    return false;
+
 }
