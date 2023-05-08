@@ -54,3 +54,11 @@ ULONG __stdcall CA::Release(){
     }
     return m_cRef;
 }
+
+void CA::Fx(){
+    std::cout << "Fx called";
+}
+
+void CA::Fy(){
+    std::cout << "Fy called";
+}
