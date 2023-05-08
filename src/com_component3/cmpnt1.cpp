@@ -154,3 +154,10 @@ HRESULT DllGetClassObject(const CLSID& rclsid, const IID& riid, void** ppv){
     cF->Release();
     return hr;
 }
+
+HRESULT DllCanUnloadNow(){
+    if(g_cComponents == 0 && g_cServerLocks == 0){
+        return S_OK;
+    }
+    return S_FALSE;
+}
