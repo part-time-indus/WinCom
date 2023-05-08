@@ -167,8 +167,7 @@ HRESULT DllCanUnloadNow(){
 BOOL WINAPI DllMain(HINSTANCE hinstDLL, DWORD fdwReason, LPVOID lpvReserved){
     if(fdwReason == DLL_PROCESS_ATTACH){
         hModule = hinstDLL;
-        return true;
     }
-    return false;
+    return true;
 
 }
