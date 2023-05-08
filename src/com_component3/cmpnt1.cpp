@@ -111,6 +111,7 @@ HRESULT __stdcall CFactory::QueryInterface(const IID& iid, void** ppv){
         return E_NOINTERFACE;
     }
     static_cast<IUnknown*>(this)->AddRef();
+    return S_OK;
 }
 
 ULONG __stdcall CFactory::AddRef(){
@@ -171,12 +172,12 @@ HRESULT DllCanUnloadNow(){
 }
 
 HRESULT DllRegisterServer(){
-    return RegisterDLL(hModule, CLSID_COMPONENT1, g_szFriendlyName, g_szVerIndProgId, g_szProgId);
+    return RegisterDll(hModule, CLSID_COMPONENT1, g_szFriendlyName, g_szVerIndProgId, g_szProgId);
 
 }
 
 HRESULT DllUnregisterServer(){
-    return UnregisterDLL(CLSID_COMPONENT1, g_szProgId, g_szVerIndProgId);
+    return UnregisterDll(CLSID_COMPONENT1, g_szProgId, g_szVerIndProgId);
 }
 
 BOOL WINAPI DllMain(HINSTANCE hinstDLL, DWORD fdwReason, LPVOID lpvReserved){
