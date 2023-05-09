@@ -33,7 +33,7 @@ class CA: public IX, public IY{
         IUnknown* m_pUnkInner;
 };
 
-CA::CA(): m_cRef(1), m_cIZ(NULL){
+CA::CA(): m_cRef(1), m_pUnkInner(NULL){
     InterlockedIncrement(&g_cComponents);
 
 }
