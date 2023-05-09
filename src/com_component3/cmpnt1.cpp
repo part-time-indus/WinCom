@@ -30,7 +30,7 @@ class CA: public IX, public IY{
         virtual void Fy();
     private: 
         long m_cRef;
-        IUnknown* m_cIZ;
+        IUnknown* m_pUnkInner;
 };
 
 CA::CA(): m_cRef(1), m_cIZ(NULL){
