@@ -30,9 +30,10 @@ class CA: public IX, public IY{
         virtual void Fy();
     private: 
         long m_cRef;
+        IUnknown* m_cIZ;
 };
 
-CA::CA(): m_cRef(1){
+CA::CA(): m_cRef(1), m_cIZ(NULL){
     InterlockedIncrement(&g_cComponents);
 
 }
