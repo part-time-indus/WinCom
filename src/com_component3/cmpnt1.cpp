@@ -86,6 +86,14 @@ HRESULT __stdcall CA::QueryInterface(const IID& iid, void** ppv){
     }else if(iid == IID_IY){
         trace("Component:\tReturn pointer to IY");
         *ppv = static_cast<IY*>(this);
+    }else if(iid == IID_IZ){
+        trace("Component:\tReturn pointer to IZ");
+#if 1
+        m_pUnkInner->QueryInterface(IID_IZ, ppv);
+#else
+        *ppv = m_pIZ;
+#endif
+
     }else{
         return E_NOINTERFACE;
     }
