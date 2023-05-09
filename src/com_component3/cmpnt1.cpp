@@ -28,9 +28,11 @@ class CA: public IX, public IY{
         virtual ULONG __stdcall Release();
         virtual void Fx();
         virtual void Fy();
+        HRESULT Init();
     private: 
         long m_cRef;
         IUnknown* m_pUnkInner;
+        IZ* m_pIZ;
 };
 
 CA::CA(): m_cRef(1), m_pUnkInner(NULL){
@@ -41,6 +43,26 @@ CA::CA(): m_cRef(1), m_pUnkInner(NULL){
 CA::~CA(){
     trace("Component:\tDestroying itself");
     InterlockedDecrement(&g_cComponents);
+
+}
+HRESULT CA::Init(){
+    IUnknown* pUnkOuter = static_cast<IX*>(this);
+    trace("Create inner component.");
+    HRESULT hr = CoCreateInstance(CLSID_COMPONENT2, pUnkOuter, CLSCTX_INPROC_SERVER, IID_IUnknown, (void**) &m_pUnkInner);
+    if(FAILED(hr)){
+        trace("Could not create contained component.");
+        return E_FAIL;
+    }
+    hr = m_pUnkInner->QueryInterface(IID_IZ, (void**)&m_pIZ);
+    if(FAILED(hr)){
+        trace("Inner component does not suport the interface");
+        m_pUnkInner->Release();
+        m_pUnkInner = NULL;
+        m_pIZ = NULL;
+        return E_FAIL;
+    }
+    pUnkOuter->Release();
+    return S_OK;
 }
 HRESULT __stdcall CA::QueryInterface(const IID& iid, void** ppv){
     trace("QueryInterface: Creating Interface");
