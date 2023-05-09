@@ -179,7 +179,13 @@ HRESULT __stdcall CFactory::CreateInstance(IUnknown* pUnkOuter, const IID& iid, 
         return E_OUTOFMEMORY;
 
     }
-    HRESULT hr = ca->QueryInterface(iid, ppv);
+    HRESULT hr = ca->Init();
+    if(FAILED(hr)){
+        //NOTE: This is where the component gets deleted => m_cRef = 0;
+        ca->Release();
+        return hr;
+    }
+    hr = ca->QueryInterface(iid, ppv);
     ca->Release();
     return hr;
 }
