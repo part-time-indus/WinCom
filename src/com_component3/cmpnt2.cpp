@@ -37,7 +37,7 @@ class BA: public IZ, public INonDelegatingUnknown
         IUnknown* m_pUnkOuter;
 };
 
-BA::BA():m_cRef(1)
+BA::BA():m_cRef(1), m_pUnkOuter(NULL)
 {
     InterlockedIncrement(&g_bComponents);
 
