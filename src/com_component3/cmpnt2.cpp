@@ -18,9 +18,9 @@ void trace(char* pMsg){
 
 interface INonDelegatingUnknown{
     virtual HRESULT INonDelegatingQueryInterface(const IID& riid, void** ppv) = 0;
-    virtual ULONG NonDelegatingAddRef() = 0;
-    virtual ULONG NonDelegatingRelease() = 0;
-}
+    virtual ULONG INonDelegatingAddRef() = 0;
+    virtual ULONG INonDelegatingRelease() = 0;
+};
 
 
 class BA: public IZ, public INonDelegatingUnknown
@@ -31,6 +31,11 @@ class BA: public IZ, public INonDelegatingUnknown
         virtual HRESULT __stdcall QueryInterface(const IID& iid, void** ppv);
         virtual ULONG __stdcall AddRef();
         virtual ULONG __stdcall Release();
+
+        virtual HRESULT INonDelegatingQueryInterface(const IID& riid, void** ppv);
+        virtual ULONG INonDelegatingAddRef();
+        virtual ULONG INonDelegatingRelease();
+
         virtual void Fz();
     private:
         long m_cRef;
@@ -48,11 +53,11 @@ BA::~BA(){
     InterlockedDecrement(&g_bComponents);
 }
 
-HRESULT __stdcall BA::QueryInterface(const IID& riid, void** ppv){
+HRESULT __stdcall BA::INonDelegatingQueryInterface(const IID& riid, void** ppv){
     trace("QueryInterface: Creating Interface");
     *ppv = NULL;
     if(riid == IID_IUnknown){
-       *ppv = static_cast<IZ*>(this);
+       *ppv = static_cast<INonDelegatingUnknown*>(this);
     }else if(riid == IID_IZ){
         trace("Component:\tPointer to interface IZ");
         *ppv = static_cast<IZ*>(this);
@@ -61,6 +66,25 @@ HRESULT __stdcall BA::QueryInterface(const IID& riid, void** ppv){
     }
     reinterpret_cast<IUnknown*>(this)->AddRef();
     return S_OK;
+}
+
+ULONG __stdcall BA::INonDelegatingAddRef(){
+    return InterlockedIncrement(&m_cRef);
+}
+
+ULONG __stdcall BA::INonDelegatingRelease(){
+    InterlockedDecrement(&m_cRef);
+    if(m_cRef == 0){
+        delete this;
+        return 0;
+    }
+    return m_cRef;
+}
+
+
+
+
+HRESULT __stdcall BA::QueryInterface(const IID& riid, void** ppv){
 }
 
 ULONG __stdcall BA::AddRef(){
