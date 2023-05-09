@@ -207,7 +207,7 @@ HRESULT DllGetClassObject(const CLSID& rclsid, const IID& riid, void** ppv){
     if(cF == NULL){
         return E_OUTOFMEMORY;
     }
-    HRESULT hr = cF->QueryInterface(IID_IClassFactory, ppv);
+    HRESULT hr = cF->QueryInterface(riid, ppv);
     cF->Release();
     return hr;
 }
