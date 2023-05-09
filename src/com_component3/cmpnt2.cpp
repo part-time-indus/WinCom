@@ -26,7 +26,7 @@ interface INonDelegatingUnknown{
 class BA: public IZ, public INonDelegatingUnknown
 {
     public:
-        BA();
+        BA(IUnknown* pUnkOuter);
         ~BA();
         virtual HRESULT __stdcall QueryInterface(const IID& iid, void** ppv);
         virtual ULONG __stdcall AddRef();
@@ -35,16 +35,22 @@ class BA: public IZ, public INonDelegatingUnknown
         virtual HRESULT INonDelegatingQueryInterface(const IID& riid, void** ppv);
         virtual ULONG INonDelegatingAddRef();
         virtual ULONG INonDelegatingRelease();
-
         virtual void Fz();
     private:
         long m_cRef;
         IUnknown* m_pUnkOuter;
 };
 
-BA::BA():m_cRef(1), m_pUnkOuter(NULL)
+BA::BA(IUnknown* pUnkOuter):m_cRef(1)
 {
     InterlockedIncrement(&g_bComponents);
+    if(pUnkOuter == NULL){
+        trace("Not aggregating; delegate to nondelegating IUnknwn");
+        m_pUnkOuter = reinterpret_cast<IUnknown*>(static_cast<INonDelegatingUnknown*>(this));
+    }else{
+        trace("Aggregating; delegate to outer unknown");
+        m_pUnkOuter = pUnkOuter; 
+    }
 
 }
 
@@ -52,7 +58,6 @@ BA::~BA(){
     trace("Component:\tDestroying Itself");
     InterlockedDecrement(&g_bComponents);
 }
-
 HRESULT __stdcall BA::INonDelegatingQueryInterface(const IID& riid, void** ppv){
     trace("QueryInterface: Creating Interface");
     *ppv = NULL;
@@ -64,7 +69,7 @@ HRESULT __stdcall BA::INonDelegatingQueryInterface(const IID& riid, void** ppv){
     }else{
         return E_NOINTERFACE;
     }
-    reinterpret_cast<IUnknown*>(this)->AddRef();
+    reinterpret_cast<IUnknown*>(*ppv)->AddRef();
     return S_OK;
 }
 
@@ -85,19 +90,18 @@ ULONG __stdcall BA::INonDelegatingRelease(){
 
 
 HRESULT __stdcall BA::QueryInterface(const IID& riid, void** ppv){
+    trace("Delegate QueryInterface");
+    return m_pUnkOuter->QueryInterface(riid, ppv);
 }
 
 ULONG __stdcall BA::AddRef(){
-    return InterlockedIncrement(&m_cRef);
+    trace("Delegate Add Ref.");
+    return m_pUnkOuter->AddRef();
 }
 
 ULONG __stdcall BA::Release(){
-    InterlockedDecrement(&m_cRef);
-    if(m_cRef == 0){
-        delete this;
-        return 0;
-    }
-    return m_cRef;
+    trace("Delegate Release.");
+    return m_pUnkOuter->Release();
 }
 
 void BA::Fz(){
@@ -137,7 +141,7 @@ HRESULT __stdcall BFactory::QueryInterface(const IID& riid, void** ppv){
     }else{
         return E_NOINTERFACE;
     }
-    reinterpret_cast<IUnknown*>(this)->AddRef();
+    reinterpret_cast<IUnknown*>(*ppv)->AddRef();
     return S_OK;
 }
 
@@ -155,16 +159,16 @@ ULONG __stdcall BFactory::Release(){
 }
 
 HRESULT __stdcall BFactory::CreateInstance(IUnknown* pUnkOuter, const IID& riid, void** ppv){
-    if(pUnkOuter != NULL){
+    if(pUnkOuter != NULL && riid != IID_IUnknown){
         return CLASS_E_NOAGGREGATION;
     }
-    BA* ba = new BA;
+    BA* ba = new BA(pUnkOuter);
     if(ba == NULL){
         return E_OUTOFMEMORY;
     }
-    HRESULT hr = ba->QueryInterface(riid, ppv);
-    ba->Release();
-    return S_OK;
+    HRESULT hr = ba->INonDelegatingQueryInterface(riid, ppv);
+    ba->INonDelegatingRelease();
+    return hr;
 }
 
 HRESULT __stdcall BFactory::LockServer(BOOL bLock){
@@ -188,7 +192,7 @@ HRESULT DllGetClassObject(const CLSID& rclsid, const IID& riid, void** ppv){
         return E_OUTOFMEMORY;
     }
 
-    HRESULT hr = bFactory->QueryInterface(IID_IClassFactory, ppv);
+    HRESULT hr = bFactory->QueryInterface(riid, ppv);
     bFactory->Release();
     return hr;
 }
