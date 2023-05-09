@@ -16,9 +16,14 @@ void trace(char* pMsg){
     std::cout << pMsg << std::endl;
 }
 
+interface INonDelegatingUnknown{
+    virtual HRESULT INonDelegatingQueryInterface(const IID& riid, void** ppv) = 0;
+    virtual ULONG NonDelegatingAddRef() = 0;
+    virtual ULONG NonDelegatingRelease() = 0;
+}
 
 
-class BA: public IZ
+class BA: public IZ, public INonDelegatingUnknown
 {
     public:
         BA();
