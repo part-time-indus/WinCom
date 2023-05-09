@@ -29,6 +29,7 @@ class BA: public IZ
         virtual void Fz();
     private:
         long m_cRef;
+        IUnknown* m_UnkOuter;
 };
 
 BA::BA():m_cRef(1)
