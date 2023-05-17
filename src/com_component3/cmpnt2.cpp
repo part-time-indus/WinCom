@@ -17,9 +17,9 @@ void trace(char* pMsg){
 }
 
 interface INonDelegatingUnknown{
-    virtual HRESULT INonDelegatingQueryInterface(const IID& riid, void** ppv) = 0;
-    virtual ULONG INonDelegatingAddRef() = 0;
-    virtual ULONG INonDelegatingRelease() = 0;
+    virtual HRESULT __stdcall INonDelegatingQueryInterface(const IID& riid, void** ppv) = 0;
+    virtual ULONG __stdcall INonDelegatingAddRef() = 0;
+    virtual ULONG __stdcall INonDelegatingRelease() = 0;
 };
 
 
@@ -32,9 +32,9 @@ class BA: public IZ, public INonDelegatingUnknown
         virtual ULONG __stdcall AddRef();
         virtual ULONG __stdcall Release();
 
-        virtual HRESULT INonDelegatingQueryInterface(const IID& riid, void** ppv);
-        virtual ULONG INonDelegatingAddRef();
-        virtual ULONG INonDelegatingRelease();
+        virtual HRESULT __stdcall INonDelegatingQueryInterface(const IID& riid, void** ppv);
+        virtual ULONG __stdcall INonDelegatingAddRef();
+        virtual ULONG __stdcall INonDelegatingRelease();
         virtual void Fz();
     private:
         long m_cRef;
@@ -43,30 +43,33 @@ class BA: public IZ, public INonDelegatingUnknown
 
 BA::BA(IUnknown* pUnkOuter):m_cRef(1)
 {
+    trace("Inner Component:\t\tCreating IUnknown Object");
     InterlockedIncrement(&g_bComponents);
     if(pUnkOuter == NULL){
-        trace("Not aggregating; delegate to nondelegating IUnknwn");
+        trace("Inner Component (Not aggregating):\t\tDelegate to NonDelegating IUnknown");
         m_pUnkOuter = reinterpret_cast<IUnknown*>(static_cast<INonDelegatingUnknown*>(this));
     }else{
-        trace("Aggregating; delegate to outer unknown");
+        trace("Inner Component (Aggregating):\t\tDelegate to Outer Unknown");
         m_pUnkOuter = pUnkOuter; 
     }
 
 }
 
 BA::~BA(){
-    trace("Component:\tDestroying Itself");
+    trace("Inner Component:\t\tDestroying Itself");
     InterlockedDecrement(&g_bComponents);
 }
 HRESULT __stdcall BA::INonDelegatingQueryInterface(const IID& riid, void** ppv){
-    trace("QueryInterface: Creating Interface");
+    trace("Inner Component - INonDelegatingQueryInterface:\t\tQuerying Interface");
     *ppv = NULL;
     if(riid == IID_IUnknown){
+        trace("Inner Component - INonDelegatingQueryInterface:\t\tGetting pointer to Interface INonDelegatingUnknown");
        *ppv = static_cast<INonDelegatingUnknown*>(this);
     }else if(riid == IID_IZ){
-        trace("Component:\tPointer to interface IZ");
+        trace("Inner Component - INonDelegatingQueryInterface:\t\tGetting pointer to interface IZ");
         *ppv = static_cast<IZ*>(this);
     }else{
+        trace("Inner Component - INonDelegatingQueryInterface:\t\tInterface not found");
         return E_NOINTERFACE;
     }
     reinterpret_cast<IUnknown*>(*ppv)->AddRef();
@@ -74,10 +77,13 @@ HRESULT __stdcall BA::INonDelegatingQueryInterface(const IID& riid, void** ppv){
 }
 
 ULONG __stdcall BA::INonDelegatingAddRef(){
+    trace("Inner Component - INonDelegatingAddRef:\t\tIncrementing INonDelegatingUnknown reference count");
+
     return InterlockedIncrement(&m_cRef);
 }
 
 ULONG __stdcall BA::INonDelegatingRelease(){
+    trace("Inner Component - INonDelegatingRelease:\t\tDecrementing INonDelegatingUnknown reference count");
     InterlockedDecrement(&m_cRef);
     if(m_cRef == 0){
         delete this;
@@ -90,22 +96,22 @@ ULONG __stdcall BA::INonDelegatingRelease(){
 
 
 HRESULT __stdcall BA::QueryInterface(const IID& riid, void** ppv){
-    trace("Delegate QueryInterface");
+    trace("Inner Component - QueryInterface: Delegating to QueryInterface of outer component");
     return m_pUnkOuter->QueryInterface(riid, ppv);
 }
 
 ULONG __stdcall BA::AddRef(){
-    trace("Delegate Add Ref.");
+    trace("Inner Component - AddRef:\t\tDelegating to AddRef of outer component.");
     return m_pUnkOuter->AddRef();
 }
 
 ULONG __stdcall BA::Release(){
-    trace("Delegate Release.");
+    trace("Inner Component - Release:\t\tDelegating to Release of the outer component.");
     return m_pUnkOuter->Release();
 }
 
 void BA::Fz(){
-    trace("Fz called");
+    std::cout << "Fz called" << std::endl;
 }
 
 
@@ -126,19 +132,23 @@ class BFactory: public IClassFactory
 
 BFactory::BFactory(): m_cRef(1)
 {
+        trace("Inner Component Factory:\t\tCreating IClassFactory Object");
 
 }
 
 BFactory::~BFactory()
 {
-    trace("Factory:\tDestroying Itself");
+    trace("Inner Component Factory:\t\tDestroying self");
 }
 
 HRESULT __stdcall BFactory::QueryInterface(const IID& riid, void** ppv){
+    trace("Inner Component Factory - QueryInterface:\tQuerying Interface");
     *ppv = NULL;
     if(riid == IID_IUnknown || riid == IID_IClassFactory){
+        trace("Inner Component Factory - QueryInterface:\tGetting pointer to interface IID_IClassFactory");
         *ppv = static_cast<IClassFactory*>(this);
     }else{
+        trace("Inner Component Factory - QueryInterface:\t\tInterface not found");
         return E_NOINTERFACE;
     }
     reinterpret_cast<IUnknown*>(*ppv)->AddRef();
@@ -146,10 +156,12 @@ HRESULT __stdcall BFactory::QueryInterface(const IID& riid, void** ppv){
 }
 
 ULONG __stdcall BFactory::AddRef(){
+    trace("Inner Component Factory - AddRef:\t\tIncrementing factory reference count");
     return InterlockedIncrement(&m_cRef);
 }
 
 ULONG __stdcall BFactory::Release(){
+    trace("Inner Component Factory - Release:\t\tDecrementing factory reference count");
     InterlockedDecrement(&m_cRef);
     if(m_cRef == 0){
         delete this;
@@ -159,6 +171,7 @@ ULONG __stdcall BFactory::Release(){
 }
 
 HRESULT __stdcall BFactory::CreateInstance(IUnknown* pUnkOuter, const IID& riid, void** ppv){
+    trace("Inner Component Factory - CreateInstance:\t\tCreating instance of the component");
     if(pUnkOuter != NULL && riid != IID_IUnknown){
         return CLASS_E_NOAGGREGATION;
     }
@@ -182,13 +195,13 @@ HRESULT __stdcall BFactory::LockServer(BOOL bLock){
 }
 
 
-HRESULT DllGetClassObject(const CLSID& rclsid, const IID& riid, void** ppv){
+HRESULT __stdcall DllGetClassObject(const CLSID& rclsid, const IID& riid, void** ppv){
     if(rclsid != CLSID_COMPONENT2){
         return CLASS_E_CLASSNOTAVAILABLE;
     }
     BFactory* bFactory = new BFactory;
 
-    if(bFactory != NULL){
+    if(bFactory == NULL){
         return E_OUTOFMEMORY;
     }
 
@@ -197,7 +210,7 @@ HRESULT DllGetClassObject(const CLSID& rclsid, const IID& riid, void** ppv){
     return hr;
 }
 
-HRESULT DllCanUnloadNow(){
+HRESULT __stdcall DllCanUnloadNow(){
     if(g_bComponents == 0 && g_bServerLocks == 0){
         return S_OK;
     }
