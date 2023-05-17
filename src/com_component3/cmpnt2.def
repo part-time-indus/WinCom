@@ -1,4 +1,4 @@
-LIBRARY         Cmpnt2.dll
+LIBRARY         cmpnt2.dll
 
 EXPORTS
                 DllGetClassObject   PRIVATE
