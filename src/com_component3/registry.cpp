@@ -1,18 +1,62 @@
 #include<iostream>
 #include<objbase.h>
 #include<assert.h>
-
+#include<strsafe.h>
+#include<wchar.h>
+#include<winuser.h>
+#include<winbase.h>
+#pragma comment(lib,"user32.lib")
 void CLSIDtoChar(const CLSID&, char*, int);
 BOOL CreateKey(const char*, const char*, const char*);
 LONG RecursiveDeleteKey(HKEY key, const char*);
+void ErrorExit(LPTSTR);
 
 const int CLSID_STRLEN = 39;
+LSTATUS error_code;
+
+void ErrorExit(LPTSTR lpszFunction) 
+{ 
+
+    LPVOID lpMsgBuf;
+    LPVOID lpDisplayBuf;
+    DWORD dw = GetLastError(); 
+
+    FormatMessage(
+        FORMAT_MESSAGE_ALLOCATE_BUFFER | 
+        FORMAT_MESSAGE_FROM_SYSTEM |
+        FORMAT_MESSAGE_IGNORE_INSERTS,
+        NULL,
+        dw,
+        MAKELANGID(LANG_NEUTRAL, SUBLANG_DEFAULT),
+        (LPTSTR) &lpMsgBuf,
+        0, NULL );
+
+    // Display the error message and exit the process
+
+    lpDisplayBuf = (LPVOID)LocalAlloc(LMEM_ZEROINIT, 
+        (lstrlen((LPCTSTR)lpMsgBuf) + lstrlen((LPCTSTR)lpszFunction) + 40) * sizeof(TCHAR)); 
+    char intStr[64];
+    _itoa(error_code, intStr, 10);
+    char msg[128];
+    strcpy_s(msg, 128, "ERROR: ");
+    strcat_s(msg, 128, intStr);
+    StringCchPrintf((LPTSTR)lpDisplayBuf, 
+        LocalSize(lpDisplayBuf) / sizeof(TCHAR),
+        TEXT("%s failed with error %d: %s"), 
+        lpszFunction, dw, lpMsgBuf); 
+    MessageBox(NULL, (LPCTSTR)lpDisplayBuf, (LPCTSTR)msg, MB_OK); 
+    LocalFree(lpMsgBuf);
+    LocalFree(lpDisplayBuf);
+    ExitProcess(dw); 
+}
+
 
 extern "C" HRESULT RegisterDll(HMODULE hModule, const CLSID& clsid, const char* szFriendlyName, const char* szVerIndProgName, const char* szProgName){
     char szCLSID[CLSID_STRLEN];
     char szKey[64];
     char szFile[512];
     CLSIDtoChar(clsid, szCLSID, CLSID_STRLEN);
+
     errno_t eRes = strcpy_s(szKey,64,"CLSID\\");
     assert(eRes == 0);
     eRes = strcat_s(szKey, 64, szCLSID);
@@ -56,7 +100,6 @@ extern "C" HRESULT UnregisterDll(const CLSID& clsid, const char* szProgName, con
     assert(res == ERROR_SUCCESS || res == ERROR_FILE_NOT_FOUND);
     RecursiveDeleteKey(HKEY_CLASSES_ROOT, szVerIndProgName);
     assert(res == ERROR_SUCCESS || res == ERROR_FILE_NOT_FOUND);
-
     return S_OK;
 
 }
@@ -65,9 +108,10 @@ extern "C" HRESULT UnregisterDll(const CLSID& clsid, const char* szProgName, con
 
 
 void CLSIDtoChar(const CLSID& clsid, char* szCLSID, int length){
+    //0xbb, 0x0, 0x80, 0xc7, 0xb2, 0xd6, 0x82});
     LPOLESTR wszCLSID;
     HRESULT hr = StringFromCLSID(clsid,&wszCLSID);
-    assert(hr == S_OK);
+    assert(SUCCEEDED(hr));
     size_t sz_converted; 
     errno_t err = wcstombs_s(&sz_converted, szCLSID, length, wszCLSID, length);
     assert(err == 0);
@@ -77,16 +121,16 @@ void CLSIDtoChar(const CLSID& clsid, char* szCLSID, int length){
 BOOL CreateKey(const char* key, const char* subkey, const char* value){
     char szKey[1024];
     size_t dwSize = 1024;
+    HKEY hKey;
     errno_t eResult = strcpy_s(szKey, dwSize, key);
     assert(eResult == 0);
-    eResult = strcat_s(szKey, dwSize, "\\");
-    assert(eResult == 0);
     if(subkey != NULL){
-        eResult = strcat_s(szKey, 1024, subkey);
+        eResult = strcat_s(szKey, sizeof(szKey)/sizeof(char), "\\");
+        assert(eResult == 0);
+        eResult = strcat_s(szKey, sizeof(szKey)/sizeof(char), subkey);
         assert(eResult == 0);
 
     }
-    HKEY hKey;
     LSTATUS lResult = RegCreateKeyExA(
         HKEY_CLASSES_ROOT,
         szKey,
@@ -97,19 +141,25 @@ BOOL CreateKey(const char* key, const char* subkey, const char* value){
         NULL,
         &hKey,
         NULL
-    ); 
+    );  
+    assert(lResult != 5);
     if(lResult != ERROR_SUCCESS){
+        error_code = lResult;
+        // char intStr[64];
+        // _itoa(lResult, intStr, 10);
+        ErrorExit(TEXT("RegCreateKeyExA"));
         return false;
     }
 
     if(value != NULL){
-        LSTATUS lResult = RegSetValueExA(hKey,
+        lResult = RegSetValueExA(hKey,
                                         NULL,
                                         0,
                                         REG_SZ,
                                         (BYTE*) value,
                                         strlen(value) + 1
                                         );
+        assert(lResult == ERROR_SUCCESS);
     }
     RegCloseKey(hKey);
     return true;
