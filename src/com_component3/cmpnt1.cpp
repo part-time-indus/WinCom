@@ -36,12 +36,13 @@ class CA: public IX, public IY{
 };
 
 CA::CA(): m_cRef(1), m_pUnkInner(NULL){
+    trace("Outer Component:\t\tCreating IUnknown Object");
     InterlockedIncrement(&g_cComponents);
 
 }
 
 CA::~CA(){
-    trace("Component:\tDestroying itself");
+    trace("Outer Component:\t\tDestroying itself");
     InterlockedDecrement(&g_cComponents);
     //NOTE: Prevent recursive destruction on next AddRef/Release pair.
     m_cRef = 1;
@@ -54,19 +55,18 @@ CA::~CA(){
     if(m_pIZ != NULL){
         m_pIZ->Release();
     }
-
 }
 HRESULT CA::Init(){
     IUnknown* pUnkOuter = static_cast<IX*>(this);
-    trace("Create inner component.");
+    trace("Outer Component - Init:\t\tCreate inner component.");
     HRESULT hr = CoCreateInstance(CLSID_COMPONENT2, pUnkOuter, CLSCTX_INPROC_SERVER, IID_IUnknown, (void**) &m_pUnkInner);
     if(FAILED(hr)){
-        trace("Could not create contained component.");
+        trace("Outer Component - Init:\t\tCould not create contained component.");
         return E_FAIL;
     }
     hr = m_pUnkInner->QueryInterface(IID_IZ, (void**)&m_pIZ);
     if(FAILED(hr)){
-        trace("Inner component does not suport the interface");
+        trace("Outer Component - Init:\t\tInner component does not suport the interface");
         m_pUnkInner->Release();
         m_pUnkInner = NULL;
         m_pIZ = NULL;
@@ -76,18 +76,18 @@ HRESULT CA::Init(){
     return S_OK;
 }
 HRESULT __stdcall CA::QueryInterface(const IID& iid, void** ppv){
-    trace("QueryInterface: Creating Interface");
+    trace("Outer Component - QueryInterface:\t\tQuerying Interface");
     *ppv = NULL;
     if(iid == IID_IUnknown){
         *ppv = static_cast<IX*>(this);
     }else if(iid == IID_IX){
-        trace("Component:\tReturn pointer to IX");
+        trace("Outer Component - QueryInterface:\t\tReturn pointer to IX");
         *ppv = static_cast<IX*>(this);
     }else if(iid == IID_IY){
-        trace("Component:\tReturn pointer to IY");
+        trace("Outer Component - QueryInterface:\t\tReturn pointer to IY");
         *ppv = static_cast<IY*>(this);
     }else if(iid == IID_IZ){
-        trace("Component:\tReturn pointer to IZ");
+        trace("Outer Component - QueryInterface:\t\tReturn pointer to IZ");
 #if 1
         m_pUnkInner->QueryInterface(IID_IZ, ppv);
 #else
@@ -102,10 +102,12 @@ HRESULT __stdcall CA::QueryInterface(const IID& iid, void** ppv){
 }
 
 ULONG __stdcall CA::AddRef(){
+    trace("Outer Component - AddRef:\t\tIncrementing Ref Count");
     return InterlockedIncrement(&m_cRef);
 }
 
 ULONG __stdcall CA::Release(){
+    trace("Outer Component - Release:\t\tDecrementing Ref Count");
     InterlockedDecrement(&m_cRef);
     if(m_cRef == 0){
         delete this;
@@ -115,11 +117,11 @@ ULONG __stdcall CA::Release(){
 }
 
 void CA::Fx(){
-    std::cout << "Fx called";
+    std::cout << "Fx called" << std::endl;
 }
 
 void CA::Fy(){
-    std::cout << "Fy called";
+    std::cout << "Fy called" << std::endl;
 }
 
 
@@ -138,29 +140,37 @@ class CFactory: public IClassFactory{
 };
 
 CFactory::CFactory():m_cRef(1){
+    trace("Outer Component Factory:\t\tCreating IClassFactory Object.");
 
 }
 
 CFactory::~CFactory(){
-    trace("Class factory:\t\tDestroy self.");
+    trace("Outer Component Factory:\t\tDestroy self.");
 }
 
 HRESULT __stdcall CFactory::QueryInterface(const IID& iid, void** ppv){
+    trace("Outer Component Factory - QueryInterface:\t\tQuerying Interface.");
     *ppv = NULL;
     if(iid == IID_IUnknown || iid == IID_IClassFactory){
+        trace("Outer Component Factory - QueryInterface:\t\tGetting pointer to IID_IClassFactory.");
         *ppv = static_cast<IClassFactory*>(this);
     }else{
+        trace("Outer Component Factory - QueryInterface:\t\tInterface not found.");
         return E_NOINTERFACE;
     }
-    static_cast<IUnknown*>(this)->AddRef();
+    static_cast<IUnknown*>(*ppv)->AddRef();
     return S_OK;
 }
 
 ULONG __stdcall CFactory::AddRef(){
+    trace("Outer Component Factory - AddRef:\t\tIncrementing Reference Count.");
+
     return InterlockedIncrement(&m_cRef);
 }
 
 ULONG __stdcall CFactory::Release(){
+        trace("Outer Component Factory - Release:\t\tDecrementing Reference Count.");
+
     InterlockedDecrement(&m_cRef);
     if(m_cRef == 0){
         delete this;
@@ -170,18 +180,20 @@ ULONG __stdcall CFactory::Release(){
 }
 
 HRESULT __stdcall CFactory::CreateInstance(IUnknown* pUnkOuter, const IID& iid, void** ppv){
-    trace("Class Factory:\t\tCreate Component");
+    trace("Outer Component Factory - CreateInstance:\t\tCreating instance of the Component");
     if(pUnkOuter != NULL){
         return CLASS_E_NOAGGREGATION;
     }
     CA* ca = new CA;
     if(ca == NULL){
+        trace("Outer Component Factory - CreateInstance:\t\tOut Of Memory");
         return E_OUTOFMEMORY;
 
     }
     HRESULT hr = ca->Init();
     if(FAILED(hr)){
         //NOTE: This is where the component gets deleted => m_cRef = 0;
+        trace("Outer Component Factory - CreateInstance:\t\tInit Failed");
         ca->Release();
         return hr;
     }
@@ -198,7 +210,7 @@ HRESULT __stdcall CFactory::LockServer(BOOL bLock){
     }
     return S_OK;
 }
-HRESULT DllGetClassObject(const CLSID& rclsid, const IID& riid, void** ppv){
+HRESULT __stdcall DllGetClassObject(const CLSID& rclsid, const IID& riid, void** ppv){
     *ppv = NULL;
     if(rclsid != CLSID_COMPONENT1){
         return CLASS_E_CLASSNOTAVAILABLE;
@@ -212,19 +224,19 @@ HRESULT DllGetClassObject(const CLSID& rclsid, const IID& riid, void** ppv){
     return hr;
 }
 
-HRESULT DllCanUnloadNow(){
+HRESULT __stdcall DllCanUnloadNow(){
     if(g_cComponents == 0 && g_cServerLocks == 0){
         return S_OK;
     }
     return S_FALSE;
 }
 
-HRESULT DllRegisterServer(){
+HRESULT __stdcall DllRegisterServer(){
     return RegisterDll(hModule, CLSID_COMPONENT1, g_szFriendlyName, g_szVerIndProgId, g_szProgId);
 
 }
 
-HRESULT DllUnregisterServer(){
+HRESULT __stdcall DllUnregisterServer(){
     return UnregisterDll(CLSID_COMPONENT1, g_szProgId, g_szVerIndProgId);
 }
 
