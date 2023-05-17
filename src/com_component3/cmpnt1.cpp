@@ -97,7 +97,7 @@ HRESULT __stdcall CA::QueryInterface(const IID& iid, void** ppv){
     }else{
         return E_NOINTERFACE;
     }
-    reinterpret_cast<IUnknown*>(this)->AddRef();
+    reinterpret_cast<IUnknown*>(*ppv)->AddRef();
     return S_OK;
 }
 
