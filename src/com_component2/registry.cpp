@@ -3,7 +3,14 @@
 
 
 
+
 const int CLSID_STRING_SIZE = 39 ;
+
+void CLSIDtoChar(const CLSID&, char*, int);
+BOOL CreateKey(const char*, const char*, const char*);
+LONG RecursiveDeleteKey(HKEY key, const char*);
+void ErrorExit(LPTSTR);
+
 
 HRESULT RegisterServer(HMODULE hModule, const CLSID& clsid, const char* szKeyFriendlyName, const char* szVerIndProgId, const char* szProgId){
 
@@ -116,6 +123,7 @@ BOOL CreateKey(const char* szKey, const char* szSubKey, const char* szValue){
         &hKey,
         NULL
     );
+    assert(lResult == ERROR_SUCCESS);
 
     if(lResult != ERROR_SUCCESS){
         return false;
