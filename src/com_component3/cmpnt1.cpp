@@ -49,11 +49,11 @@ CA::~CA(){
     //NOTE: Counter the pUnkOuter->Release in the init method.
     IUnknown* pUnkOuter = static_cast<IX*>(this);
     pUnkOuter->AddRef();
-    if(m_pUnkInner != NULL){
-        m_pUnkInner->Release();
-    }
     if(m_pIZ != NULL){
         m_pIZ->Release();
+    }
+    if(m_pUnkInner != NULL){
+        m_pUnkInner->Release();
     }
 }
 HRESULT CA::Init(){
