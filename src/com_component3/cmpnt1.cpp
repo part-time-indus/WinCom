@@ -46,9 +46,9 @@ CA::~CA(){
     //m_cRef = 0;
     InterlockedDecrement(&g_cComponents);
     //NOTE: Prevent recursive destruction on next AddRef/Release pair.
+    m_cRef = 1;
     //NOTE: Counter the pUnkOuter->Release in the init method.
     //NOTE: Removing following two statements, m_cRef sets to -1;
-    //1:    m_cRef = 1
     IUnknown* pUnkOuter = static_cast<IX*>(this);
     pUnkOuter->AddRef();
     if(m_pIZ != NULL){
