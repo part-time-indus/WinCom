@@ -43,13 +43,18 @@ CA::CA(): m_cRef(1), m_pUnkInner(NULL){
 
 CA::~CA(){
     trace("Outer Component:\t\tDestroying itself");
+    //m_cRef = 0;
     InterlockedDecrement(&g_cComponents);
     //NOTE: Prevent recursive destruction on next AddRef/Release pair.
-    m_cRef = 1;
     //NOTE: Counter the pUnkOuter->Release in the init method.
+    //1:    m_cRef = 1
     IUnknown* pUnkOuter = static_cast<IX*>(this);
     pUnkOuter->AddRef();
     if(m_pIZ != NULL){
+        //NOTE: 2: calls outer Release, sets m_cRef = 0;
+        //NOTE: calls delete this again, which again sets m_cRef = 1 as above at 1
+        //NOTE: which again sets m_cRef = 0 as above at 2
+        //NOTE: This leads to recursive AddRef/Release;
         m_pIZ->Release();
     }
     if(m_pUnkInner != NULL){
