@@ -22,6 +22,14 @@ class IPtr
         ~IPtr(){
             Release();
         }
+        Release(){
+            if(m_pI != NULL){
+                T* pOld = m_pI;
+                m_pI = NULL;
+                pOld->Release();
+            }
+        }
+
 
 
         
