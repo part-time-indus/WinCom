@@ -36,7 +36,31 @@ class IPtr
         T** operator &(){(assert m_pI != NULL); return &m_pI;}
         T* operator ->(){(assert m_pI != NULL); return m_pI;}
 
+        T* operator =(T* pI){
+            if(m_pI != pI){
+                T* pOld = m_pI;
+                m_pI = pI;
+                if(m_pI != NULL){
+                    m_pI->AddRef();
+                }
+                if(pOld != NULL){
+                    pOld->Release();
+                }
+            }
+            return m_pI;
+        }
 
+        T* operator=(IUnknown* pI){
+            T* pOld = m_pI;
+            if(pI != NULL){
+                HRESULT hr = m_pI>QueryInterface(*piid, (void**)&m_pI);
+                assert(SUCCEEDED(hr));
+            }
+            if(pOld != NULL){
+                pOld->Release();
+            }
+            return m_pI;
+        }
         
     private: 
         T* m_pI;
