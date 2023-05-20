@@ -63,6 +63,9 @@ class IPtr
         }
 
         BOOL operator !() {return m_pI == NULL ? TRUE: FALSE;}
+        //NOTE: Usage => if(iPterObj)
+        operator BOOL() const {return m_pI != NULL ? TRUE: FALSE;}
+
 
         
         
