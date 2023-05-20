@@ -1,5 +1,5 @@
 #include<objbase.h>
-template<class T, const IID* iid> 
+template<class T, const IID* piid> 
 class IPtr
 {
     public:
@@ -16,7 +16,7 @@ class IPtr
         //NOTE: Will result in ambiguity between these two constructors
         IPtr(IUnknown* pI){
             if(pI != NULL){
-                HRESULT hr = pI->QueryInterface(iid, (void**)&m_pI);
+                HRESULT hr = pI->QueryInterface(*piid, (void**)&m_pI);
             }
         }
         ~IPtr(){
@@ -35,10 +35,6 @@ class IPtr
         T& operator *(){(assert m_pI != NULL); return *m_pI;}
         T** operator &(){(assert m_pI != NULL); return &m_pI;}
         T* operator ->(){(assert m_pI != NULL); return m_pI;}
-
-
-
-
 
 
         
