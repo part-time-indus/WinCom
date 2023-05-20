@@ -61,6 +61,10 @@ class IPtr
             }
             return m_pI;
         }
+
+        BOOL operator !() {return m_pI == NULL ? TRUE: FALSE;}
+
+        
         
     private: 
         T* m_pI;
