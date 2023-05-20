@@ -30,6 +30,8 @@ class IPtr
             }
         }
 
+        operator T*(){return m_pI};
+
 
 
         
