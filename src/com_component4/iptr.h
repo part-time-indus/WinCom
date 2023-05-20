@@ -32,9 +32,11 @@ class IPtr
 
         operator T*(){return m_pI};
 
-        T& operator *(){return *m_pI;}
-        T** operator &(){return &m_pI;}
-        T* operator ->(){return m_pI;}
+        T& operator *(){(assert m_pI != NULL); return *m_pI;}
+        T** operator &(){(assert m_pI != NULL); return &m_pI;}
+        T* operator ->(){(assert m_pI != NULL); return m_pI;}
+
+
 
 
 
