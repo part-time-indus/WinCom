@@ -66,7 +66,7 @@ class IPtr
         //NOTE: Usage => if(iPterObj)
         operator BOOL() const {return m_pI != NULL ? TRUE: FALSE;}
 
-
+        const IID& iid(){return *piid;}
         
         
     private: 
