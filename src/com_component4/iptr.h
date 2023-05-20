@@ -19,6 +19,10 @@ class IPtr
                 HRESULT hr = pI->QueryInterface(iid, (void**)&m_pI);
             }
         }
+        ~IPtr(){
+            Release();
+        }
+
 
         
     private: 
