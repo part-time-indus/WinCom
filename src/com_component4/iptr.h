@@ -12,6 +12,8 @@ class IPtr
                 m_pI->AddRef();
             }
         }
+        //NOTE: Don't use <IUnknown> to construct the Object
+        //NOTE: Will result in ambiguity between these two constructors
         IPtr(IUnknown* pI){
             if(pI != NULL){
                 HRESULT hr = pI->QueryInterface(iid, (void**)&m_pI);
