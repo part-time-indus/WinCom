@@ -4,18 +4,18 @@
 
 #include<objbase.h>
 
-interface IDelegatingUnknown{
-    virtual HRESULT STDMETHODCALLTYPE IDeleglatingUnknownQueryInterface(const IID& riid, void** ppv) = 0;
-    virtual ULONG STDMETHODCALLTYPE IDeleatingUnknownAddRef();
-    virtual ULONG STDMETHODCALLTYPE IDelegatingUnknownRelease();
+interface INonDelegatingUnknown{
+    virtual HRESULT STDMETHODCALLTYPE INonDeleglatingQueryInterface(const IID& riid, void** ppv) = 0;
+    virtual ULONG STDMETHODCALLTYPE INonDeleatingAddRef();
+    virtual ULONG STDMETHODCALLTYPE INonDelegatingRelease();
 };
 
-class CUnknown: public IDelegatingUnknown
+class CUnknown: public INonDelegatingUnknown
 {
     public:
-        virtual HRESULT STDMETHODCALLTYPE IDelgatingUnknownQueryInterface(const IID& riid, void** ppv);
-        virtual ULONG STDMETHODCALLTYPE IDelegatingUnknownAddRef();
-        virtual ULONG STDMETHODCALLTYPE IDelegatingUnknownRelease();
+        virtual HRESULT STDMETHODCALLTYPE INonDelgatingQueryInterface(const IID& riid, void** ppv);
+        virtual ULONG STDMETHODCALLTYPE INonDelegatingAddRef();
+        virtual ULONG STDMETHODCALLTYPE INonDelegatingRelease();
         CUnknown(IUnknown* pUnkOuter);
         virtual ~CUnknown();
         virtual HRESULT Init(){
@@ -35,11 +35,6 @@ class CUnknown: public IDelegatingUnknown
         IUnknown* m_pUnkOuter;
         static long m_ActiveComponents;
 
-
-
-
 };
-
-
 
 #endif
