@@ -37,4 +37,19 @@ class CUnknown: public INonDelegatingUnknown
 
 };
 
-#endif
+
+#define DECLARE_IUNKNOWN                                                        \
+virtual HRESULT STDMETHODCALLTYPE QueryInterface(const IID& riid, void** ppv)   \
+{                                                                               \
+    return GetOuterComponent()->QueryInterface(riid, ppv);                      \
+};                                                                              \
+virtual ULONG STDMETHODCALLTYPE AddRef()                                        \
+{                                                                               \
+    return GetOuterComponent()->AddRef();                                       \
+};                                                                              \
+virtual ULONG STDMETHODCALLTYPE Release()                                       \
+{                                                                               \
+    return GetOuterComponent()->ReleasE();                                      \
+};                                                                               \    
+            
+#endif                                                                          
