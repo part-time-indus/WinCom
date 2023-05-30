@@ -72,5 +72,53 @@ class IPtr
     private: 
         T* m_pI;
 
+};
+
+class IUnknownPtr{
+    public:
+        IUnknownPtr(){
+            m_pI = NULL;
+        }
+
+        IUnknownPtr(IUnknown* pI){
+            if(pI != NULL){
+                m_pI = pI;
+                m_pI->AddRef();
+            }
+        }
+        ~IUnknownPtr(){
+            Release();
+        }
+        void Release(){
+            if(m_pI != NULL){
+                IUnknown* pOld = m_pI;
+                m_pI = NULL;
+                pOld->Release();
+            }
+        }
+
+        operator IUnknown*() {return m_pI;}
+
+        IUnknown& operator * () {return *m_pI;}
+        IUnknown** operator & () {return &m_pI;}
+        IUnknown* operator -> () {return m_pI; }
+
+        IUnknown* operator = (IUnknown* pI) {
+            IUnknown* pOld = m_pI;
+            m_pI = pI;
+            if(m_pI != NULL){
+                m_pI->AddRef();
+            }
+            if(pOld != NULL){
+                pOld->Release();
+            }
+            return m_pI;
+        }
+        BOOL operator ! () {return m_pI == NULL ? TRUE : FALSE;}
+        operator BOOL () {return m_pI != NULL ? TRUE : FALSE;}
+
+
+    private:
+        IUnknown* m_pI;
 
 };
